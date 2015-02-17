@@ -16,8 +16,7 @@ def fetchArtistId(name):
     artist = data['artists']['items'][0]['id']
     return artist
 
-artist = "Britney Spears"
-print fetchArtistId(artist)
+
 
 #Checkpoint 1
 
@@ -33,7 +32,10 @@ def fetchArtistInfo(artist_id):
 	info["popularity"]=data["popularity"] #int
 	return info
 
-artist_id="26dSoYclwsYLMAKD3tpOr4"
-print fetchArtistInfo(artist_id)
+if __name__ == '__main__':
+	artist = "Britney Spears"
+	print fetchArtistId(artist)
+	artist_id="26dSoYclwsYLMAKD3tpOr4"
+	print fetchArtistInfo(artist_id)
 
 #Checkpoint 2
