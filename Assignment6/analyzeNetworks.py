@@ -45,14 +45,9 @@ def pandasToNetworkX(edgeList):
 	for sender, receiver in edgeList.to_records(index = False):
 		g.add_edge(sender, receiver)
 	return(g)
-	nx.draw(g, with_labels=False)
-	plt.show()
 
-
-#edgeList = readEdgeList('edgeList.csv')
-#pandasToNetworkX(edgeList)
-
-#not showing a graph?!?!
+#edgeList = 'edgeList.csv'
+#print pandasToNetworkX(edgeList)
 
 def randomCentralNode(inputDiGraph):
 	#takes graph --> single node from that network
