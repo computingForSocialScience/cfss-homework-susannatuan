@@ -33,25 +33,22 @@ def createNewPlaylist(artist_name):
 
 # --> Playlists table
 # Step: Find one artist
-	artist_id = fetchArtistId(name)
+	artist_id = fetchArtistId(artist_name)
 
 # Step: Add to playlists table
 	if artist_id == None: #artist's id is auto-incremented
 		return
 	else:
 		fill_playlist_table = """INSERT INTO playlists (rootArtist) VALUES (%s);"""
-		cur.execute(fill_playlist_table, name)
+		cur.execute(fill_playlist_table, artist_name)
 
 # --> Songs table
 # Step: Find related artists
-	related_artists = getDepthEdges(artist_ID, 2)
+	related_artists = getDepthEdges(artist_id, 2)
 	# Returns a list
 
-	g = pandasToNetworkX2(edgeList)
-	# Returns a datafraome
-
 	# Step: Create playlist list to hold all information
-	playlistid = cur.lastrowid
+	playlist_id = cur.lastrowid
 
 	songOrder = 1
 	playlist = []
@@ -62,27 +59,25 @@ def createNewPlaylist(artist_name):
 	for variable in range(30):
 		# Step: Pick a random related artist
 		artist = random.choice(related_artists)
-		artist_list.append(artist[1])
-		album = fetchAlbumIds(artist)
+		artist_list.append(artist)
+		album = fetchAlbumIds(artist_id)
 		# Step: Fetch albums of this random artist
 		random_artist_album = random.choice(album)
-		album_list.append(random_artist_album[1])
+		album_list.append(random_artist_album)
 		# Gives album id
 		# Step: Fetch tracks in album
 		track = fetchTrackNames(album)
 		random_track = random.choice(track)
-		track_list.append(random_track[1])
+		track_list.append(random_track)
 	# Now have three lists for artists, albums, tracks
 	# Incrementing songOrder by 1 and appending
 		songOrder += 1
-		playlist.append(playlist_id, songOrder, artistName, album_name, song)
+		playlist.append(playlist_id, songOrder, artist, album, track)
 	
-	fill_songs_table = """INSERT INTO songs (playlistId, songOrder, artistName, albumName, trackName) VALUES (%s, %s, %s, %s, %s);"""
+	fill_songs_table = """INSERT INTO songs (playlist_id, songOrder, artist, album, track) VALUES (%s, %s, %s, %s, %s);"""
 	cur.execute(fill_songs_table)
 	db.commit()
 	cur.close()
-
-#createNewPlaylist(beyonce)
 
 @app.route('/') #base web address
 def make_index_resp():
@@ -95,12 +90,16 @@ def make_index_resp():
 def make_playlists_resp():
 	# goes to database, finds playlists, creates object called playlists
 	# name for playlist and id for playlist
-    return render_template('playlists.html',playlists=playlists)
+	cur.execute('''SELECT * FROM playlists''')
+	playlists = cur.fetchall()
+	return render_template('playlists.html',playlists=playlists)
 
 
 @app.route('/playlist/<playlistId>')
 def make_playlist_resp(playlistId):
-    return render_template('playlist.html',songs=songs)
+	cur.execute('''SELECT * from songs WHERE playlistId=%s;''',playlistId)
+	songs = cur.fetchall()
+	return render_template('playlist.html',songs=songs)
 
 
 @app.route('/addPlaylist/',methods=['GET','POST'])
@@ -110,11 +109,12 @@ def add_playlist():
         return(render_template('addPlaylist.html'))
     elif request.method == 'POST':
         # this code executes when someone fills out the form
+        createNewPlaylist(artistName)
         artistName = request.form['artistName']
-        createNewPlaylist(artist_name)
         return(redirect("/playlists/"))
 
 
+createNewPlaylist('beyonce')
 
 if __name__ == '__main__':
     app.debug=True
